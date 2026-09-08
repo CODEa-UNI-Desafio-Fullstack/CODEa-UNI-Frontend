@@ -24,3 +24,8 @@ dist-ssr
 *.sw?
 
 .agents
+
+.env
+.env.example
+
+project_context.md
