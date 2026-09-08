@@ -2,7 +2,7 @@ import type { MachineryViewModel } from "../types/machinery.types";
 import { Badge } from "../../../shared/components/ui/Badge";
 import { ProgressBar } from "../../../shared/components/ui/ProgressBar";
 import { Link } from "react-router-dom";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Pencil, Trash2 } from "lucide-react";
 
 interface MachineryTableProps {
   machineries: MachineryViewModel[];
@@ -139,13 +139,15 @@ export const MachineryTable = ({
                         + Registrar Mant.
                       </Link>
                     ) : (
-                      <div className="inline-flex items-center gap-3">
+                      <div className="inline-flex items-center gap-2">
                         <button
                           type="button"
                           onClick={() => onEditType(item)}
-                          className="text-[#2563EB] hover:text-[#1D4ED8] hover:underline font-bold text-[13px] cursor-pointer"
+                          title="Editar tipo de maquinaria"
+                          aria-label={`Editar tipo de ${item.code}`}
+                          className="p-1.5 text-[#64748B] hover:text-[#2563EB] hover:bg-[#EFF6FF] rounded-md transition-colors cursor-pointer"
                         >
-                          Editar Tipo
+                          <Pencil className="w-4 h-4" />
                         </button>
                         <button
                           type="button"
@@ -158,9 +160,11 @@ export const MachineryTable = ({
                               onDelete(item.code);
                             }
                           }}
-                          className="text-[#EF4444] hover:text-[#DC2626] hover:underline font-bold text-[13px] cursor-pointer"
+                          title="Eliminar maquinaria"
+                          aria-label={`Eliminar maquinaria ${item.code}`}
+                          className="p-1.5 text-[#64748B] hover:text-[#EF4444] hover:bg-[#FEF2F2] rounded-md transition-colors cursor-pointer"
                         >
-                          Eliminar
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     )}
