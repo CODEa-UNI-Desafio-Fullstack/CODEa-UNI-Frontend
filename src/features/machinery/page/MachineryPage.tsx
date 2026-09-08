@@ -29,24 +29,24 @@ export default function MachineryPage() {
   const [isTypesModalOpen, setIsTypesModalOpen] = useState(false);
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 sm:space-y-8 animate-fade-in">
       {/* 1. Header de Vista con Botones de Acción */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-[24px] font-bold text-[#0F172A] tracking-tight">
+          <h1 className="text-[20px] sm:text-[24px] font-bold text-[#0F172A] tracking-tight">
             Equipos y Control de Horómetro
           </h1>
-          <p className="text-[14px] text-[#64748B] mt-1">
+          <p className="text-xs sm:text-[14px] text-[#64748B] mt-1">
             Administración del parque de maquinarias, estado operativo y límites de mantenimiento
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
           {/* Botón: Tipos de Maquinaria */}
           <button
             type="button"
             onClick={() => setIsTypesModalOpen(true)}
-            className="h-[40px] px-5 rounded-md border border-[#CBD5E1] bg-white text-[#334155] text-[13px] font-bold hover:bg-slate-50 transition-colors flex items-center gap-2 cursor-pointer shadow-xs"
+            className="w-full sm:w-auto justify-center h-[40px] px-5 rounded-md border border-[#CBD5E1] bg-white text-[#334155] text-[13px] font-bold hover:bg-slate-50 transition-colors flex items-center gap-2 cursor-pointer shadow-xs"
           >
             <Settings className="w-4 h-4 text-slate-500" />
             <span>Tipos de Maquinaria</span>
@@ -56,7 +56,7 @@ export default function MachineryPage() {
           <button
             type="button"
             onClick={() => setIsCreateModalOpen(true)}
-            className="h-[40px] px-5 rounded-md bg-[#2563EB] text-white text-[13px] font-bold hover:bg-[#1D4ED8] transition-colors flex items-center gap-2 cursor-pointer shadow-xs"
+            className="w-full sm:w-auto justify-center h-[40px] px-5 rounded-md bg-[#2563EB] text-white text-[13px] font-bold hover:bg-[#1D4ED8] transition-colors flex items-center gap-2 cursor-pointer shadow-xs"
           >
             <Plus className="w-4 h-4" />
             <span>+ Nueva Maquinaria</span>
@@ -76,7 +76,7 @@ export default function MachineryPage() {
       )}
 
       {/* 2. Contenedor Principal: Filtros y Tabla */}
-      <div className="bg-white border border-[#E2E8F0] rounded-xl shadow-xs p-6 space-y-6">
+      <div className="bg-white border border-[#E2E8F0] rounded-xl shadow-xs p-4 sm:p-6 space-y-4 sm:space-y-6">
         {/* Barra de Filtros */}
         <MachineryFilters
           filters={filters}

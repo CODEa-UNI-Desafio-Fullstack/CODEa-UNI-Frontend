@@ -18,8 +18,15 @@ export const MachineryTable = ({
   onDelete,
 }: MachineryTableProps) => {
   return (
-    <div className="overflow-x-auto rounded-lg border border-[#E2E8F0]">
-      <table className="w-full text-left border-collapse">
+    <div>
+      {/* Indicador de scroll para pantallas móviles */}
+      <div className="sm:hidden flex items-center justify-end gap-1 text-[11px] text-slate-400 mb-2">
+        <span>Desliza para ver más columnas</span>
+        <span className="font-bold">↔</span>
+      </div>
+
+      <div className="overflow-x-auto rounded-lg border border-[#E2E8F0]">
+        <table className="w-full text-left border-collapse">
         <thead>
           <tr className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
             <th className="py-3 px-4 text-[11px] font-bold text-[#475569] uppercase tracking-wider whitespace-nowrap">
@@ -165,5 +172,6 @@ export const MachineryTable = ({
         </tbody>
       </table>
     </div>
+  </div>
   );
 };

@@ -16,9 +16,9 @@ export const MachineryFilters = ({
   onChangeFilters,
 }: MachineryFiltersProps) => {
   return (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 sm:gap-3">
       {/* 1. Input de búsqueda por código */}
-      <div className="relative w-full sm:w-[280px]">
+      <div className="relative w-full sm:w-[240px] md:w-[280px]">
         <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         <input
           type="text"
