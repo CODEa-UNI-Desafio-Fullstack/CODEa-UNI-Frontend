@@ -33,19 +33,25 @@ export const ProjectionsTable = ({
   };
 
   return (
-    <div className="bg-white border border-[#E2E8F0] rounded-xl shadow-xs p-6">
+    <div className="bg-white border border-[#E2E8F0] rounded-xl shadow-xs p-4 sm:p-6">
       {/* Table Card Header */}
       <div>
-        <h2 className="text-[16px] font-bold text-[#0F172A] leading-tight">
+        <h2 className="text-[15px] sm:text-[16px] font-bold text-[#0F172A] leading-tight">
           Proyección Preventiva a 7 Días (Equipos que alcanzarán su umbral)
         </h2>
-        <p className="text-[13px] text-[#64748B] mt-1">
+        <p className="text-xs sm:text-[13px] text-[#64748B] mt-1">
           Cálculo basado en horómetro actual + acumulación de horas planificadas en turnos futuros
         </p>
       </div>
 
+      {/* Indicador de scroll para móviles */}
+      <div className="sm:hidden flex items-center justify-end gap-1 text-[11px] text-slate-400 mt-2">
+        <span>Desliza para ver más columnas</span>
+        <span className="font-bold">↔</span>
+      </div>
+
       {/* Table Container */}
-      <div className="overflow-x-auto mt-6 rounded-lg border border-[#E2E8F0]">
+      <div className="overflow-x-auto mt-3 sm:mt-6 rounded-lg border border-[#E2E8F0]">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-[#F8FAFC] border-b border-[#E2E8F0]">

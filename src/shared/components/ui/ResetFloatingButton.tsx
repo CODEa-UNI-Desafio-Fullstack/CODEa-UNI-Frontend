@@ -26,7 +26,7 @@ export const ResetFloatingButton = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2 pointer-events-none">
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end gap-2 pointer-events-none">
       {feedbackMessage && (
         <div className="bg-[#0F172A] text-white text-xs px-3.5 py-2.5 rounded-lg shadow-xl border border-slate-700 pointer-events-auto transition-all duration-200">
           {feedbackMessage}
@@ -37,7 +37,7 @@ export const ResetFloatingButton = () => {
         type="button"
         onClick={handleReset}
         disabled={isLoading}
-        className={`pointer-events-auto flex items-center gap-2.5 px-6 py-3.5 rounded-full font-bold text-[13px] text-white shadow-xl transition-all duration-200 cursor-pointer
+        className={`pointer-events-auto flex items-center gap-2 px-4 py-2.5 sm:px-6 sm:py-3.5 rounded-full font-bold text-xs sm:text-[13px] text-white shadow-xl transition-all duration-200 cursor-pointer
           ${
             isLoading
               ? "bg-blue-400 cursor-not-allowed"
@@ -46,7 +46,7 @@ export const ResetFloatingButton = () => {
           focus:outline-none focus:ring-4 focus:ring-blue-200`}
       >
         <RotateCcw
-          className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
+          className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isLoading ? "animate-spin" : ""}`}
         />
         <span>{isLoading ? "Reseteando..." : "Resetear Datos Demo"}</span>
       </button>

@@ -3,18 +3,18 @@ import { KpiCardsGrid } from "../components/KpiStatCard";
 import { ProjectionsTable } from "../components/ProjectionsTable";
 import { AlertCircle, RefreshCw } from "lucide-react";
 
-export const DashboardPage: React.FC = () => {
+export const DashboardPage = () => {
   const { projections, shiftsById, kpis, isLoading, error, refetch } =
     useProjections();
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Page Header */}
       <div>
-        <h1 className="text-[24px] font-bold text-[#0F172A] tracking-tight">
+        <h1 className="text-[20px] sm:text-[24px] font-bold text-[#0F172A] tracking-tight">
           Tablero de Control y Estado Operativo
         </h1>
-        <p className="text-[14px] text-[#64748B] mt-1">
+        <p className="text-xs sm:text-[14px] text-[#64748B] mt-1">
           Monitoreo en tiempo real de flota, umbrales y proyección preventiva a 7 días
         </p>
       </div>
