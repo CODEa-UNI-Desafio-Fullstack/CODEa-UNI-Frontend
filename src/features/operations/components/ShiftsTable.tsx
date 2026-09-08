@@ -1,14 +1,23 @@
 import React from "react";
-import type { ShiftResource } from "../types/operations.types";
-import { Sun, Moon, Pencil, Trash2, Calendar, AlertCircle } from "lucide-react";
+import type { ShiftResource, ShiftFilterInputs } from "../types/operations.types";
+import {
+  Sun,
+  Moon,
+  Pencil,
+  Trash2,
+  Calendar,
+  AlertCircle,
+  Filter,
+  RotateCcw,
+} from "lucide-react";
 
 interface ShiftsTableProps {
   shifts: ShiftResource[];
   isLoading: boolean;
-  dateFilter: string;
-  onDateFilterChange: (date: string) => void;
-  typeFilter: string;
-  onTypeFilterChange: (type: string) => void;
+  inputFilters: ShiftFilterInputs;
+  setInputFilters: React.Dispatch<React.SetStateAction<ShiftFilterInputs>>;
+  onApply: () => void;
+  onReset: () => void;
   onEditShift: (shift: ShiftResource) => void;
   onDeleteShift: (id: string) => void;
 }
@@ -16,13 +25,22 @@ interface ShiftsTableProps {
 export const ShiftsTable: React.FC<ShiftsTableProps> = ({
   shifts,
   isLoading,
-  dateFilter,
-  onDateFilterChange,
-  typeFilter,
-  onTypeFilterChange,
+  inputFilters,
+  setInputFilters,
+  onApply,
+  onReset,
   onEditShift,
   onDeleteShift,
 }) => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onApply();
+  };
+
+  const hasActiveFilters = Boolean(
+    inputFilters.date || inputFilters.shiftType !== "all"
+  );
+
   return (
     <div className="bg-white border border-[#E2E8F0] rounded-xl shadow-xs overflow-hidden">
       {/* Header y Filtros del Listado de Turnos */}
@@ -34,37 +52,40 @@ export const ShiftsTable: React.FC<ShiftsTableProps> = ({
           </p>
         </div>
 
-        {/* Filtros */}
-        <div className="flex flex-wrap items-center gap-3">
+        {/* Formulario de Filtros */}
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-wrap items-center gap-3"
+        >
           {/* Filtro Fecha */}
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold text-[#64748B]">Fecha:</span>
             <div className="relative">
               <input
+                id="filter-shift-date"
                 type="date"
-                value={dateFilter}
-                onChange={(e) => onDateFilterChange(e.target.value)}
+                value={inputFilters.date}
+                onChange={(e) =>
+                  setInputFilters((prev) => ({ ...prev, date: e.target.value }))
+                }
                 className="h-[34px] pl-8 pr-3 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#334155] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
               <Calendar className="w-3.5 h-3.5 text-[#94A3B8] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
-            {dateFilter && (
-              <button
-                type="button"
-                onClick={() => onDateFilterChange("")}
-                className="text-xs text-[#64748B] hover:text-[#0F172A] underline cursor-pointer"
-              >
-                Limpiar
-              </button>
-            )}
           </div>
 
           {/* Filtro Tipo */}
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold text-[#64748B]">Tipo:</span>
             <select
-              value={typeFilter}
-              onChange={(e) => onTypeFilterChange(e.target.value)}
+              id="filter-shift-type"
+              value={inputFilters.shiftType}
+              onChange={(e) =>
+                setInputFilters((prev) => ({
+                  ...prev,
+                  shiftType: e.target.value,
+                }))
+              }
               className="h-[34px] px-3 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#334155] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
             >
               <option value="all">Todos</option>
@@ -72,7 +93,33 @@ export const ShiftsTable: React.FC<ShiftsTableProps> = ({
               <option value="Noche">Noche</option>
             </select>
           </div>
-        </div>
+
+          {/* Botón Filtrar */}
+          <button
+            id="btn-apply-shift-filters"
+            type="submit"
+            disabled={isLoading}
+            className="h-[34px] px-4 bg-[#2563EB] hover:bg-[#1D4ED8] active:scale-98 text-white font-bold text-xs rounded-md shadow-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+          >
+            <Filter className="w-3.5 h-3.5" />
+            <span>{isLoading ? "Consultando..." : "Filtrar"}</span>
+          </button>
+
+          {/* Botón Limpiar */}
+          {hasActiveFilters && (
+            <button
+              id="btn-clear-shift-filters"
+              type="button"
+              onClick={onReset}
+              disabled={isLoading}
+              title="Limpiar filtros de turnos"
+              className="h-[34px] px-2.5 bg-white border border-[#CBD5E1] hover:bg-[#F1F5F9] text-[#64748B] hover:text-[#0F172A] rounded-md text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Limpiar</span>
+            </button>
+          )}
+        </form>
       </div>
 
       {/* Tabla */}

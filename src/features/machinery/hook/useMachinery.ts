@@ -15,70 +15,93 @@ export function useMachinery() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Filtros
-  const [filters, setFilters] = useState<MachineryFiltersState>({
+  // Filtros: inputFilters (edición en formulario) vs appliedFilters (enviados a backend)
+  const [inputFilters, setInputFilters] = useState<MachineryFiltersState>({
     searchCode: "",
     machineryTypeId: null,
     stateBool: null,
   });
 
-  const [refreshIndex, setRefreshIndex] = useState<number>(0);
+  const [appliedFilters, setAppliedFilters] = useState<MachineryFiltersState>({
+    searchCode: "",
+    machineryTypeId: null,
+    stateBool: null,
+  });
 
-  const refetch = useCallback(() => {
-    setIsLoading(true);
-    setRefreshIndex((prev) => prev + 1);
-  }, []);
+  const fetchMachineries = useCallback(
+    async (filtersToApply?: MachineryFiltersState) => {
+      setIsLoading(true);
+      try {
+        const active = filtersToApply ?? appliedFilters;
+        const data = await machineryService.getMachineries({
+          state: active.stateBool ?? undefined,
+          machineryTypeId: active.machineryTypeId ?? undefined,
+          code: active.searchCode ? active.searchCode.trim() : undefined,
+        });
+        setMachineries(data);
+        setError(null);
+      } catch (err: unknown) {
+        console.error("Error al consultar maquinarias:", err);
+        const msg =
+          err instanceof Error ? err.message : "Error al consultar maquinarias";
+        setError(msg);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [appliedFilters]
+  );
 
-  // Carga inicial y ante cambios de filtros
+  // Carga inicial
   useEffect(() => {
     let isMounted = true;
 
-    const loadData = async () => {
+    const loadInitialData = async () => {
+      setIsLoading(true);
       try {
         const [typesData, machineriesData] = await Promise.all([
           machineryTypeService.getMachineryTypes().catch((err) => {
             console.error("Error al cargar tipos de maquinaria:", err);
             return [] as MachineryTypeResource[];
           }),
-          machineryService
-            .getMachineries({
-              state: filters.stateBool ?? undefined,
-              machineryTypeId: filters.machineryTypeId ?? undefined,
-              code: filters.searchCode ? filters.searchCode.trim() : undefined,
-            })
-            .catch((err) => {
-              console.error("Error al cargar maquinarias:", err);
-              return [] as MachineryResource[];
-            }),
+          machineryService.getMachineries().catch((err) => {
+            console.error("Error al cargar maquinarias:", err);
+            return [] as MachineryResource[];
+          }),
         ]);
 
         if (isMounted) {
           setMachineryTypes(typesData);
           setMachineries(machineriesData);
           setError(null);
-          setIsLoading(false);
         }
       } catch (err: unknown) {
         if (isMounted) {
           const msg =
-            err instanceof Error ? err.message : "Error al consultar maquinarias";
+            err instanceof Error ? err.message : "Error al inicializar maquinarias";
           setError(msg);
-          setIsLoading(false);
         }
+      } finally {
+        if (isMounted) setIsLoading(false);
       }
     };
 
-    loadData();
+    loadInitialData();
 
     return () => {
       isMounted = false;
     };
-  }, [filters, refreshIndex]);
+  }, []);
+
+  const refetch = useCallback(() => {
+    fetchMachineries();
+  }, [fetchMachineries]);
 
   // Al presionar el botón de Reset Demo, invalidar la caché de tipos y recargar
   useDataRefetchOnReset(() => {
     machineryTypeService.invalidateCache();
-    refetch();
+    machineryTypeService.getMachineryTypes().then(setMachineryTypes).catch(console.error);
+    fetchMachineries();
   });
 
   // Mapa de tipos por nombre para asociar el umbral y el id del tipo
@@ -105,6 +128,24 @@ export function useMachinery() {
       };
     });
   }, [machineries, typesByName]);
+
+  // Aplicar filtros explícitamente al hacer click en Filtrar o Enter
+  const handleApplyFilters = () => {
+    setAppliedFilters(inputFilters);
+    fetchMachineries(inputFilters);
+  };
+
+  // Limpiar filtros y consultar todas las maquinarias
+  const handleResetFilters = () => {
+    const cleared: MachineryFiltersState = {
+      searchCode: "",
+      machineryTypeId: null,
+      stateBool: null,
+    };
+    setInputFilters(cleared);
+    setAppliedFilters(cleared);
+    fetchMachineries(cleared);
+  };
 
   // Mutaciones
   const handleUpdateType = async (code: string, newTypeId: number) => {
@@ -150,11 +191,14 @@ export function useMachinery() {
   return {
     machineries: machineryViewModels,
     machineryTypes,
-    filters,
-    setFilters,
+    inputFilters,
+    setInputFilters,
+    appliedFilters,
     isLoading,
     error,
     refetch,
+    handleApplyFilters,
+    handleResetFilters,
     handleUpdateType,
     handleCreateMachinery,
     handleDeleteMachinery,

@@ -6,13 +6,34 @@ import type {
   ShiftResource,
   CreateShiftResource,
   UpdateShiftResource,
+  ShiftFilterParams,
+  ShiftFilterInputs,
   AssignmentDetailResource,
   CreateAssignmentResource,
+  AssignmentFilterParams,
+  AssignmentFilterInputs,
   OperatorOption,
 } from "../types/operations.types";
 import type { MachineryResource } from "../../machinery/types/machinery.types";
-import type { RuleViolationError, AssignmentValidationErrorResponse } from "../../../shared/types/api.types";
+import type {
+  RuleViolationError,
+  AssignmentValidationErrorResponse,
+} from "../../../shared/types/api.types";
 import { isAxiosError } from "axios";
+
+const defaultShiftFilters: ShiftFilterInputs = {
+  date: "",
+  shiftType: "all",
+};
+
+const defaultAssignmentFilters: AssignmentFilterInputs = {
+  operatorName: "",
+  machineryType: "all",
+  machineryCode: "",
+  startDate: "",
+  endDate: "",
+  shiftType: "all",
+};
 
 export function useOperations() {
   const [shifts, setShifts] = useState<ShiftResource[]>([]);
@@ -25,48 +46,85 @@ export function useOperations() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Filtros de Turnos
-  const [shiftDateFilter, setShiftDateFilter] = useState<string>("");
-  const [shiftTypeFilter, setShiftTypeFilter] = useState<string>("all"); // "all" | "Dia" | "Noche"
+  // Filtros de Turnos: input (formulario) vs applied (backend)
+  const [shiftInputFilters, setShiftInputFilters] =
+    useState<ShiftFilterInputs>(defaultShiftFilters);
+  const [shiftAppliedFilters, setShiftAppliedFilters] =
+    useState<ShiftFilterInputs>(defaultShiftFilters);
 
-  // Filtros de Asignaciones
-  const [assignmentOperatorFilter, setAssignmentOperatorFilter] = useState<string>("");
-  const [assignmentMachineryTypeFilter, setAssignmentMachineryTypeFilter] = useState<string>("all");
-  const [assignmentMachineryCodeFilter, setAssignmentMachineryCodeFilter] = useState<string>("");
-  const [assignmentStartDateFilter, setAssignmentStartDateFilter] = useState<string>("");
-  const [assignmentEndDateFilter, setAssignmentEndDateFilter] = useState<string>("");
-  const [assignmentShiftTypeFilter, setAssignmentShiftTypeFilter] = useState<string>("all"); // "all" | "true" | "false"
+  // Filtros de Asignaciones: input (formulario) vs applied (backend)
+  const [assignmentInputFilters, setAssignmentInputFilters] =
+    useState<AssignmentFilterInputs>(defaultAssignmentFilters);
+  const [assignmentAppliedFilters, setAssignmentAppliedFilters] =
+    useState<AssignmentFilterInputs>(defaultAssignmentFilters);
 
   // Estado para captura de errores estructurados 422 de asignación
-  const [rejectionErrors, setRejectionErrors] = useState<RuleViolationError[] | null>(null);
+  const [rejectionErrors, setRejectionErrors] = useState<
+    RuleViolationError[] | null
+  >(null);
 
-  // Carga de turnos
-  const fetchShifts = useCallback(async () => {
-    setIsLoadingShifts(true);
-    try {
-      const data = await shiftService.getShifts();
-      setShifts(data);
-    } catch (err) {
-      console.error("Error al cargar turnos:", err);
-      setError("No se pudieron cargar los turnos.");
-    } finally {
-      setIsLoadingShifts(false);
-    }
-  }, []);
+  // Carga de turnos delegando filtros al backend
+  const fetchShifts = useCallback(
+    async (filtersToApply?: ShiftFilterInputs) => {
+      setIsLoadingShifts(true);
+      try {
+        const active = filtersToApply ?? shiftAppliedFilters;
+        const queryParams: ShiftFilterParams = {};
+        if (active.date) {
+          queryParams.date = active.date;
+        }
+        if (active.shiftType !== "all") {
+          // Backend: true = Dia, false = Noche
+          queryParams.shiftType = active.shiftType.toLowerCase() === "dia";
+        }
+        const data = await shiftService.getShifts(queryParams);
+        setShifts(data);
+      } catch (err) {
+        console.error("Error al cargar turnos:", err);
+        setError("No se pudieron cargar los turnos.");
+      } finally {
+        setIsLoadingShifts(false);
+      }
+    },
+    [shiftAppliedFilters]
+  );
 
-  // Carga de asignaciones
-  const fetchAssignments = useCallback(async () => {
-    setIsLoadingAssignments(true);
-    try {
-      const data = await assignmentService.getAssignments();
-      setAssignments(data);
-    } catch (err) {
-      console.error("Error al cargar asignaciones:", err);
-      setError("No se pudieron cargar las asignaciones.");
-    } finally {
-      setIsLoadingAssignments(false);
-    }
-  }, []);
+  // Carga de asignaciones delegando filtros al backend
+  const fetchAssignments = useCallback(
+    async (filtersToApply?: AssignmentFilterInputs) => {
+      setIsLoadingAssignments(true);
+      try {
+        const active = filtersToApply ?? assignmentAppliedFilters;
+        const queryParams: AssignmentFilterParams = {};
+        if (active.operatorName.trim()) {
+          queryParams.operatorName = active.operatorName.trim();
+        }
+        if (active.machineryType && active.machineryType !== "all") {
+          queryParams.machineryType = active.machineryType;
+        }
+        if (active.machineryCode.trim()) {
+          queryParams.machineryCode = active.machineryCode.trim();
+        }
+        if (active.startDate) {
+          queryParams.startDate = active.startDate;
+        }
+        if (active.endDate) {
+          queryParams.endDate = active.endDate;
+        }
+        if (active.shiftType !== "all") {
+          queryParams.shiftType = active.shiftType === "true";
+        }
+        const data = await assignmentService.getAssignments(queryParams);
+        setAssignments(data);
+      } catch (err) {
+        console.error("Error al cargar asignaciones:", err);
+        setError("No se pudieron cargar las asignaciones.");
+      } finally {
+        setIsLoadingAssignments(false);
+      }
+    },
+    [assignmentAppliedFilters]
+  );
 
   // Carga de operadores y maquinarias para selects de modales
   const fetchModalDependencies = useCallback(async () => {
@@ -103,52 +161,34 @@ export function useOperations() {
     };
   }, [fetchShifts, fetchAssignments, fetchModalDependencies]);
 
-  // Filtrado reactivo de turnos
-  const filteredShifts = shifts.filter((s) => {
-    if (shiftDateFilter && s.date !== shiftDateFilter) {
-      return false;
-    }
-    if (shiftTypeFilter !== "all" && s.shiftType.toLowerCase() !== shiftTypeFilter.toLowerCase()) {
-      return false;
-    }
-    return true;
-  });
+  // Acciones de filtros de Turnos
+  const handleApplyShiftFilters = () => {
+    setShiftAppliedFilters(shiftInputFilters);
+    fetchShifts(shiftInputFilters);
+  };
 
-  // Filtrado reactivo de asignaciones
-  const filteredAssignments = assignments.filter((a) => {
-    if (
-      assignmentOperatorFilter &&
-      !a.operatorName.toLowerCase().includes(assignmentOperatorFilter.toLowerCase())
-    ) {
-      return false;
-    }
-    if (
-      assignmentMachineryTypeFilter !== "all" &&
-      a.machineryTypeName?.toLowerCase() !== assignmentMachineryTypeFilter.toLowerCase()
-    ) {
-      return false;
-    }
-    if (
-      assignmentMachineryCodeFilter &&
-      !a.machineryCode.toLowerCase().includes(assignmentMachineryCodeFilter.toLowerCase())
-    ) {
-      return false;
-    }
-    if (assignmentStartDateFilter && a.shiftDate < assignmentStartDateFilter) {
-      return false;
-    }
-    if (assignmentEndDateFilter && a.shiftDate > assignmentEndDateFilter) {
-      return false;
-    }
-    if (assignmentShiftTypeFilter !== "all") {
-      const isDay = assignmentShiftTypeFilter === "true";
-      if (a.shiftType !== isDay) return false;
-    }
-    return true;
-  });
+  const handleResetShiftFilters = () => {
+    setShiftInputFilters(defaultShiftFilters);
+    setShiftAppliedFilters(defaultShiftFilters);
+    fetchShifts(defaultShiftFilters);
+  };
+
+  // Acciones de filtros de Asignaciones
+  const handleApplyAssignmentFilters = () => {
+    setAssignmentAppliedFilters(assignmentInputFilters);
+    fetchAssignments(assignmentInputFilters);
+  };
+
+  const handleResetAssignmentFilters = () => {
+    setAssignmentInputFilters(defaultAssignmentFilters);
+    setAssignmentAppliedFilters(defaultAssignmentFilters);
+    fetchAssignments(defaultAssignmentFilters);
+  };
 
   // Crear Turno
-  const handleCreateShift = async (payload: CreateShiftResource): Promise<boolean> => {
+  const handleCreateShift = async (
+    payload: CreateShiftResource
+  ): Promise<boolean> => {
     setIsSubmitting(true);
     try {
       await shiftService.createShift(payload);
@@ -164,7 +204,10 @@ export function useOperations() {
   };
 
   // Editar Turno
-  const handleUpdateShift = async (id: string, payload: UpdateShiftResource): Promise<boolean> => {
+  const handleUpdateShift = async (
+    id: string,
+    payload: UpdateShiftResource
+  ): Promise<boolean> => {
     setIsSubmitting(true);
     try {
       await shiftService.updateShift(id, payload);
@@ -187,13 +230,17 @@ export function useOperations() {
       return true;
     } catch (err) {
       console.error("Error al eliminar turno:", err);
-      alert("No se pudo eliminar el turno. Verifique que no tenga asignaciones asociadas.");
+      alert(
+        "No se pudo eliminar el turno. Verifique que no tenga asignaciones asociadas."
+      );
       return false;
     }
   };
 
   // Crear Asignación con captura de 422
-  const handleCreateAssignment = async (payload: CreateAssignmentResource): Promise<boolean> => {
+  const handleCreateAssignment = async (
+    payload: CreateAssignmentResource
+  ): Promise<boolean> => {
     setIsSubmitting(true);
     setRejectionErrors(null);
     try {
@@ -206,10 +253,14 @@ export function useOperations() {
         if (errorData?.errors && errorData.errors.length > 0) {
           setRejectionErrors(errorData.errors);
         } else if (errorData?.message) {
-          setRejectionErrors([{ rule: "REGLA_GENERAL", message: errorData.message }]);
+          setRejectionErrors([
+            { rule: "REGLA_GENERAL", message: errorData.message },
+          ]);
         }
       } else if (isAxiosError(err) && err.response?.data?.message) {
-        setRejectionErrors([{ rule: "ERROR", message: err.response.data.message }]);
+        setRejectionErrors([
+          { rule: "ERROR", message: err.response.data.message },
+        ]);
       } else {
         alert("Ocurrió un error inesperado al procesar la asignación.");
       }
@@ -220,7 +271,10 @@ export function useOperations() {
   };
 
   // Iniciar Asignación (PATCH /start)
-  const handleStartAssignment = async (id: string, timeStart?: string): Promise<boolean> => {
+  const handleStartAssignment = async (
+    id: string,
+    timeStart?: string
+  ): Promise<boolean> => {
     setIsSubmitting(true);
     try {
       await assignmentService.startAssignment(id, timeStart);
@@ -236,7 +290,10 @@ export function useOperations() {
   };
 
   // Cerrar Asignación (PATCH /end)
-  const handleEndAssignment = async (id: string, timeEnd?: string): Promise<boolean> => {
+  const handleEndAssignment = async (
+    id: string,
+    timeEnd?: string
+  ): Promise<boolean> => {
     setIsSubmitting(true);
     try {
       await assignmentService.endAssignment(id, timeEnd);
@@ -253,9 +310,7 @@ export function useOperations() {
 
   return {
     shifts,
-    filteredShifts,
     assignments,
-    filteredAssignments,
     operators,
     machineries,
     isLoadingShifts,
@@ -265,23 +320,17 @@ export function useOperations() {
     rejectionErrors,
     setRejectionErrors,
     // Filtros de turnos
-    shiftDateFilter,
-    setShiftDateFilter,
-    shiftTypeFilter,
-    setShiftTypeFilter,
+    shiftInputFilters,
+    setShiftInputFilters,
+    shiftAppliedFilters,
+    handleApplyShiftFilters,
+    handleResetShiftFilters,
     // Filtros de asignaciones
-    assignmentOperatorFilter,
-    setAssignmentOperatorFilter,
-    assignmentMachineryTypeFilter,
-    setAssignmentMachineryTypeFilter,
-    assignmentMachineryCodeFilter,
-    setAssignmentMachineryCodeFilter,
-    assignmentStartDateFilter,
-    setAssignmentStartDateFilter,
-    assignmentEndDateFilter,
-    setAssignmentEndDateFilter,
-    assignmentShiftTypeFilter,
-    setAssignmentShiftTypeFilter,
+    assignmentInputFilters,
+    setAssignmentInputFilters,
+    assignmentAppliedFilters,
+    handleApplyAssignmentFilters,
+    handleResetAssignmentFilters,
     // Métodos
     handleCreateShift,
     handleUpdateShift,

@@ -10,8 +10,8 @@ import { Plus, CalendarPlus } from "lucide-react";
 
 export default function OperationsPage() {
   const {
-    filteredShifts,
-    filteredAssignments,
+    shifts,
+    assignments,
     operators,
     machineries,
     isLoadingShifts,
@@ -20,23 +20,15 @@ export default function OperationsPage() {
     rejectionErrors,
     setRejectionErrors,
     // Filtros de turnos
-    shiftDateFilter,
-    setShiftDateFilter,
-    shiftTypeFilter,
-    setShiftTypeFilter,
+    shiftInputFilters,
+    setShiftInputFilters,
+    handleApplyShiftFilters,
+    handleResetShiftFilters,
     // Filtros de asignaciones
-    assignmentOperatorFilter,
-    setAssignmentOperatorFilter,
-    assignmentMachineryTypeFilter,
-    setAssignmentMachineryTypeFilter,
-    assignmentMachineryCodeFilter,
-    setAssignmentMachineryCodeFilter,
-    assignmentStartDateFilter,
-    setAssignmentStartDateFilter,
-    assignmentEndDateFilter,
-    setAssignmentEndDateFilter,
-    assignmentShiftTypeFilter,
-    setAssignmentShiftTypeFilter,
+    assignmentInputFilters,
+    setAssignmentInputFilters,
+    handleApplyAssignmentFilters,
+    handleResetAssignmentFilters,
     // Acciones
     handleCreateShift,
     handleUpdateShift,
@@ -51,7 +43,8 @@ export default function OperationsPage() {
   const [shiftToEdit, setShiftToEdit] = useState<ShiftResource | null>(null);
 
   const [isCreateAssignmentOpen, setIsCreateAssignmentOpen] = useState(false);
-  const [assignmentToClose, setAssignmentToClose] = useState<AssignmentDetailResource | null>(null);
+  const [assignmentToClose, setAssignmentToClose] =
+    useState<AssignmentDetailResource | null>(null);
 
   const handleOpenEditShift = (shift: ShiftResource) => {
     setShiftToEdit(shift);
@@ -107,12 +100,12 @@ export default function OperationsPage() {
       {/* 2. Sección Listado de Turnos */}
       <section>
         <ShiftsTable
-          shifts={filteredShifts}
+          shifts={shifts}
           isLoading={isLoadingShifts}
-          dateFilter={shiftDateFilter}
-          onDateFilterChange={setShiftDateFilter}
-          typeFilter={shiftTypeFilter}
-          onTypeFilterChange={setShiftTypeFilter}
+          inputFilters={shiftInputFilters}
+          setInputFilters={setShiftInputFilters}
+          onApply={handleApplyShiftFilters}
+          onReset={handleResetShiftFilters}
           onEditShift={handleOpenEditShift}
           onDeleteShift={handleDeleteShift}
         />
@@ -121,20 +114,12 @@ export default function OperationsPage() {
       {/* 3. Sección Asignaciones Operativas */}
       <section>
         <AssignmentsTable
-          assignments={filteredAssignments}
+          assignments={assignments}
           isLoading={isLoadingAssignments}
-          operatorFilter={assignmentOperatorFilter}
-          onOperatorFilterChange={setAssignmentOperatorFilter}
-          machineryTypeFilter={assignmentMachineryTypeFilter}
-          onMachineryTypeFilterChange={setAssignmentMachineryTypeFilter}
-          machineryCodeFilter={assignmentMachineryCodeFilter}
-          onMachineryCodeFilterChange={setAssignmentMachineryCodeFilter}
-          startDateFilter={assignmentStartDateFilter}
-          onStartDateFilterChange={setAssignmentStartDateFilter}
-          endDateFilter={assignmentEndDateFilter}
-          onEndDateFilterChange={setAssignmentEndDateFilter}
-          shiftTypeFilter={assignmentShiftTypeFilter}
-          onShiftTypeFilterChange={setAssignmentShiftTypeFilter}
+          inputFilters={assignmentInputFilters}
+          setInputFilters={setAssignmentInputFilters}
+          onApply={handleApplyAssignmentFilters}
+          onReset={handleResetAssignmentFilters}
           onStartAssignment={handleStartAssignment}
           onOpenCloseShiftModal={(assignment) => setAssignmentToClose(assignment)}
         />
@@ -155,7 +140,7 @@ export default function OperationsPage() {
       <CreateAssignmentModal
         isOpen={isCreateAssignmentOpen}
         onClose={() => setIsCreateAssignmentOpen(false)}
-        shifts={filteredShifts}
+        shifts={shifts}
         operators={operators}
         machineries={machineries}
         rejectionErrors={rejectionErrors}

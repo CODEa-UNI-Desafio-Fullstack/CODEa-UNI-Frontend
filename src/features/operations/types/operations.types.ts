@@ -61,6 +61,20 @@ export interface AssignmentFilterParams {
   shiftType?: boolean;
 }
 
+export interface ShiftFilterInputs {
+  date: string;
+  shiftType: string; // "all" | "Dia" | "Noche"
+}
+
+export interface AssignmentFilterInputs {
+  operatorName: string;
+  machineryType: string; // "all" | machineryTypeName
+  machineryCode: string;
+  startDate: string;
+  endDate: string;
+  shiftType: string; // "all" | "true" | "false"
+}
+
 export interface OperatorOption {
   id: string;
   name: string;

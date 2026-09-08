@@ -12,10 +12,12 @@ export default function MachineryPage() {
   const {
     machineries,
     machineryTypes,
-    filters,
-    setFilters,
+    inputFilters,
+    setInputFilters,
     isLoading,
     error,
+    handleApplyFilters,
+    handleResetFilters,
     handleUpdateType,
     handleCreateMachinery,
     handleDeleteMachinery,
@@ -79,9 +81,12 @@ export default function MachineryPage() {
       <div className="bg-white border border-[#E2E8F0] rounded-xl shadow-xs p-4 sm:p-6 space-y-4 sm:space-y-6">
         {/* Barra de Filtros */}
         <MachineryFilters
-          filters={filters}
+          inputFilters={inputFilters}
+          setInputFilters={setInputFilters}
           machineryTypes={machineryTypes}
-          onChangeFilters={setFilters}
+          onApply={handleApplyFilters}
+          onReset={handleResetFilters}
+          isLoading={isLoading}
         />
 
         {/* Tabla de Equipos */}
