@@ -85,8 +85,8 @@ export const AssignmentsTable: React.FC<AssignmentsTableProps> = ({
         </p>
 
         {/* Formulario de Filtros */}
-        <form onSubmit={handleSubmit} className="mt-4 pt-4 border-t border-[#F1F5F9] space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <form onSubmit={handleSubmit} className="mt-4 pt-4 border-t border-[#F1F5F9]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
             {/* 1. Nombre de operador */}
             <div className="flex flex-col gap-1">
               <label htmlFor="filter-assignment-operator" className="text-[11px] font-semibold text-[#64748B]">
@@ -163,7 +163,7 @@ export const AssignmentsTable: React.FC<AssignmentsTableProps> = ({
               <label className="text-[11px] font-semibold text-[#64748B]">
                 Rango de fechas (Desde - Hasta)
               </label>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 <input
                   aria-label="Fecha inicio asignación"
                   type="date"
@@ -174,7 +174,7 @@ export const AssignmentsTable: React.FC<AssignmentsTableProps> = ({
                       startDate: e.target.value,
                     }))
                   }
-                  className="w-1/2 h-[36px] px-2 bg-white border border-[#CBD5E1] rounded-md text-[11px] text-[#334155] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-1/2 h-[36px] px-2.5 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#334155] focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <span className="text-slate-400 text-xs">-</span>
                 <input
@@ -187,7 +187,7 @@ export const AssignmentsTable: React.FC<AssignmentsTableProps> = ({
                       endDate: e.target.value,
                     }))
                   }
-                  className="w-1/2 h-[36px] px-2 bg-white border border-[#CBD5E1] rounded-md text-[11px] text-[#334155] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-1/2 h-[36px] px-2.5 bg-white border border-[#CBD5E1] rounded-md text-xs text-[#334155] focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -216,33 +216,33 @@ export const AssignmentsTable: React.FC<AssignmentsTableProps> = ({
                 <ChevronDown className="w-3.5 h-3.5 text-[#64748B] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
             </div>
-          </div>
 
-          {/* Acciones de filtro */}
-          <div className="flex items-center justify-end gap-2 pt-1">
-            {hasActiveFilters && (
+            {/* 6. Acciones de filtro (Alineadas en la misma cuadrícula) */}
+            <div className="flex items-end justify-end gap-2 pt-1 sm:pt-0">
+              {hasActiveFilters && (
+                <button
+                  id="btn-clear-assignment-filters"
+                  type="button"
+                  onClick={onReset}
+                  disabled={isLoading}
+                  title="Limpiar filtros de asignaciones"
+                  className="h-[36px] px-3.5 bg-white border border-[#CBD5E1] hover:bg-[#F1F5F9] text-[#64748B] hover:text-[#0F172A] rounded-md text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Limpiar</span>
+                </button>
+              )}
+
               <button
-                id="btn-clear-assignment-filters"
-                type="button"
-                onClick={onReset}
+                id="btn-apply-assignment-filters"
+                type="submit"
                 disabled={isLoading}
-                title="Limpiar filtros de asignaciones"
-                className="h-[36px] px-3 bg-white border border-[#CBD5E1] hover:bg-[#F1F5F9] text-[#64748B] hover:text-[#0F172A] rounded-md text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                className="h-[36px] px-6 bg-[#2563EB] hover:bg-[#1D4ED8] active:scale-98 text-white font-bold text-xs rounded-md shadow-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Limpiar</span>
+                <Filter className="w-3.5 h-3.5" />
+                <span>{isLoading ? "Consultando..." : "Filtrar"}</span>
               </button>
-            )}
-
-            <button
-              id="btn-apply-assignment-filters"
-              type="submit"
-              disabled={isLoading}
-              className="h-[36px] px-6 bg-[#2563EB] hover:bg-[#1D4ED8] active:scale-98 text-white font-bold text-xs rounded-md shadow-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
-            >
-              <Filter className="w-3.5 h-3.5" />
-              <span>{isLoading ? "Consultando..." : "Filtrar"}</span>
-            </button>
+            </div>
           </div>
         </form>
       </div>
